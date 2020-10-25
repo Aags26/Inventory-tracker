@@ -5,7 +5,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <include
-        android:id="@+id/parent_recycler_view"
+        android:id="@+id/parent_recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         layout="@layout/recycler_view"/>
