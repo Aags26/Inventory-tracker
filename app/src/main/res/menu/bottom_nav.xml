@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <item
+        android:id="@+id/essentials"
+        android:icon="@drawable/ic_essentials"
+        android:title="Essentials"/>
+
+    <item
+        android:id="@+id/todo_list"
+        android:icon="@drawable/ic_todo"
+        android:title="TO-DO"/>
+
 </menu>
