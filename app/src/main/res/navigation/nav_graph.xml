@@ -1,5 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto" android:id="@+id/nav_graph">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/googleAuthFragment">
+    <fragment
+        android:id="@+id/googleAuthFragment"
+        android:name="com.bphc.oops_project.fragments.auth.GoogleAuthFragment"
+        android:label="fragment_google_auth"
+        tools:layout="@layout/fragment_google_auth" >
+        <action
+            android:id="@+id/action_googleAuthFragment_to_dashboardFragment"
+            app:destination="@id/dashboardFragment" />
+        <action
+            android:id="@+id/action_googleAuthFragment_to_phoneAuthFragment"
+            app:destination="@id/phoneAuthFragment" />
+        <action
+            android:id="@+id/action_googleAuthFragment_to_userDetailsFragment"
+            app:destination="@id/userDetailsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/dashboardFragment"
+        android:name="com.bphc.oops_project.fragments.DashboardFragment"
+        android:label="fragment_dashboard"
+        tools:layout="@layout/fragment_dashboard" >
+        <argument
+            android:name="user"
+            app:argType="com.bphc.oops_project.models.User"
+            app:nullable="true"
+            android:defaultValue="@null" />
+    </fragment>
+    <fragment
+        android:id="@+id/phoneAuthFragment"
+        android:name="com.bphc.oops_project.fragments.auth.PhoneAuthFragment"
+        android:label="fragent_phone_auth"
+        tools:layout="@layout/fragent_phone_auth" >
+        <action
+            android:id="@+id/action_phoneAuthFragment_to_userDetailsFragment"
+            app:destination="@id/userDetailsFragment" />
+        <argument
+            android:name="user"
+            app:argType="com.bphc.oops_project.models.User"
+            app:nullable="true"
+            android:defaultValue="@null" />
+    </fragment>
+    <fragment
+        android:id="@+id/userDetailsFragment"
+        android:name="com.bphc.oops_project.fragments.auth.UserDetailsFragment"
+        android:label="fragment_user_details"
+        tools:layout="@layout/fragment_user_details" >
+        <action
+            android:id="@+id/action_userDetailsFragment_to_dashboardFragment"
+            app:destination="@id/dashboardFragment" />
+        <argument
+            android:name="user"
+            app:argType="com.bphc.oops_project.models.User"
+            app:nullable="true"
+            android:defaultValue="@null" />
+    </fragment>
 
 </navigation>

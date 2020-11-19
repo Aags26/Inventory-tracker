@@ -12,13 +12,20 @@ import androidx.fragment.app.Fragment;
 
 import com.bphc.oops_project.R;
 import com.bphc.oops_project.fragments.dashboard.EssentialsFragment;
+import com.bphc.oops_project.helper.OnItemClickListener;
+import com.bphc.oops_project.models.User;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class DashboardFragment extends Fragment implements BottomNavigationView.OnNavigationItemSelectedListener {
 
+    public static User user = null;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            user = DashboardFragmentArgs.fromBundle(getArguments()).getUser();
+        }
         loadFragment(new EssentialsFragment());
     }
 
@@ -32,6 +39,7 @@ public class DashboardFragment extends Fragment implements BottomNavigationView.
 
         return view;
     }
+
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -50,7 +58,7 @@ public class DashboardFragment extends Fragment implements BottomNavigationView.
         return true;
     }
 
-    private void loadFragment(Fragment fragment) {
+    public void loadFragment(Fragment fragment) {
         if (getActivity() != null) {
             getActivity().getSupportFragmentManager()
                     .beginTransaction()

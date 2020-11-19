@@ -15,6 +15,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="12dp"
+            android:fontFamily="@font/work_sans_regular"
             android:textColor="@color/black"
             android:textSize="18sp"
             app:layout_constraintStart_toStartOf="parent"
@@ -26,9 +27,30 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
+            android:background="?android:attr/selectableItemBackground"
             android:src="@drawable/ic_add_item"
             app:layout_constraintStart_toEndOf="@id/item_group_text"
             app:layout_constraintTop_toTopOf="@id/item_group_text" />
+
+        <ImageView
+            android:id="@+id/delete_category_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="12dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:src="@drawable/ic_delete"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/edit_category_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:src="@drawable/ic_edit"
+            app:layout_constraintEnd_toStartOf="@id/delete_category_image"
+            app:layout_constraintTop_toTopOf="@id/delete_category_image" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/child_recycler"
