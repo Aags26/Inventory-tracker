@@ -1,6 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="8dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="8dp">
+
+        <ImageView
+            android:id="@+id/running_out_item_image"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_launcher_background"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/running_out_item_category"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            app:layout_constraintStart_toEndOf="@id/running_out_item_image"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Category"
+            android:fontFamily="@font/work_sans_regular"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/running_out_item_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="2dp"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintHorizontal_bias="0.2"
+            app:layout_constraintStart_toEndOf="@id/running_out_item_image"
+            app:layout_constraintTop_toBottomOf="@id/running_out_item_category"
+            tools:text="Abc" />
+
+        <ImageView
+            android:id="@+id/running_out_decrease_quantity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:src="@drawable/ic_minus"
+            app:layout_constraintStart_toStartOf="@id/running_out_item_name"
+            app:layout_constraintTop_toBottomOf="@id/running_out_item_name"
+            app:layout_constraintVertical_bias="0.8" />
+
+        <TextView
+            android:id="@+id/running_out_schedule_task"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="?android:attr/selectableItemBackground"
+            android:fontFamily="@font/candara"
+            android:gravity="center"
+            android:text="Schedule!"
+            android:textColor="@color/purple_500"
+            android:textSize="16sp"
+            app:layout_constraintTop_toBottomOf="@id/running_out_decrease_quantity"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/running_out_item_image" />
+
+        <TextView
+            android:id="@+id/running_out_item_quantity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="@id/running_out_decrease_quantity"
+            app:layout_constraintEnd_toStartOf="@id/running_out_increase_quantity"
+            app:layout_constraintStart_toEndOf="@id/running_out_decrease_quantity"
+            app:layout_constraintTop_toTopOf="@id/running_out_decrease_quantity"
+            tools:text="5" />
+
+        <ImageView
+            android:id="@+id/running_out_increase_quantity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:src="@drawable/ic_plus"
+            app:layout_constraintBottom_toBottomOf="@id/running_out_decrease_quantity"
+            app:layout_constraintStart_toEndOf="@id/running_out_item_quantity"
+            app:layout_constraintTop_toTopOf="@id/running_out_decrease_quantity" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>

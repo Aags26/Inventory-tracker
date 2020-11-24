@@ -7,4 +7,6 @@ public class SharedPrefsConstants {
     public static final String PHONE_VERIFIED = "phone_verified";
     public static final String PROFESSION_GIVEN = "profession_given";
 
+    public static final String USER_PHOTO = "user_photo";
+
 }

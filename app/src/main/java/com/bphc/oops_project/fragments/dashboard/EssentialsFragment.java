@@ -1,27 +1,28 @@
 package com.bphc.oops_project.fragments.dashboard;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bphc.oops_project.R;
 import com.bphc.oops_project.adapters.ItemGroupAdapter;
+import com.bphc.oops_project.adapters.RunningOutAdapter;
+import com.bphc.oops_project.app.Constants;
 import com.bphc.oops_project.fragments.AddItemFragment;
-import com.bphc.oops_project.fragments.DashboardFragment;
 import com.bphc.oops_project.helper.APIClient;
 import com.bphc.oops_project.helper.OnItemClickListener;
 import com.bphc.oops_project.helper.Webservices;
@@ -33,7 +34,6 @@ import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -45,14 +45,18 @@ import static com.bphc.oops_project.prefs.SharedPrefsConstants.JWTS_TOKEN;
 public class EssentialsFragment extends Fragment implements View.OnClickListener, OnItemClickListener {
 
     private ItemGroupAdapter adapter;
-    private ImageView listEmptyImage, addCategoryImage;
+    private RunningOutAdapter runningOutAdapter;
+    private ImageView listEmptyImage;
     private ArrayList<ItemGroup> itemGroups = new ArrayList<>();
+    private ArrayList<Item> runningOutItems = new ArrayList<>();
     private AlertDialog alertDialog;
-    private String inputCategory, authToken;
-    private TextInputLayout addCategory;
+    private String inputCategory, inputQuantity, authToken;
+    private TextInputLayout addCategory, updateQuantity;
     private Webservices webservices;
-    private int position;
+    private int position, posItem, posParent;
     private Button add_update;
+    private ConstraintLayout runningOutLayout;
+    private TextView textSufficient;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -72,8 +76,17 @@ public class EssentialsFragment extends Fragment implements View.OnClickListener
         Toolbar toolbar = view.findViewById(R.id.toolbar_essentials);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
-        addCategoryImage = view.findViewById(R.id.category_add_image);
+        ImageView addCategoryImage = view.findViewById(R.id.category_add_image);
         addCategoryImage.setOnClickListener(this);
+
+        runningOutLayout = view.findViewById(R.id.running_out_view);
+        textSufficient = view.findViewById(R.id.text_sufficient);
+
+        RecyclerView runningOutRecycler = view.findViewById(R.id.running_out_recycler);
+        RecyclerView.LayoutManager runningOutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+        runningOutAdapter = new RunningOutAdapter(runningOutItems, getContext());
+        runningOutRecycler.setLayoutManager(runningOutManager);
+        runningOutRecycler.setAdapter(runningOutAdapter);
 
         RecyclerView parentRecycler = view.findViewById(R.id.parent_recycler);
         listEmptyImage = view.findViewById(R.id.empty_list_image);
@@ -85,6 +98,7 @@ public class EssentialsFragment extends Fragment implements View.OnClickListener
         parentRecycler.setAdapter(adapter);
 
         adapter.setOnItemClickListener(this);
+        runningOutAdapter.setOnItemClickListener(this);
 
         return view;
     }
@@ -98,10 +112,29 @@ public class EssentialsFragment extends Fragment implements View.OnClickListener
                 ServerResponse mServerResponse = response.body();
                 if (mServerResponse != null) {
                     if (!mServerResponse.getError()) {
+                        itemGroups.clear();
+                        runningOutItems.clear();
                         itemGroups.addAll(mServerResponse.getResult().getCategories());
+                        for (int pos = 0; pos < itemGroups.size(); pos++) {
+                            SharedPrefs.setIntParams(getContext(), itemGroups.get(pos).getGroup(), pos);
+                        }
                         adapter.notifyDataSetChanged();
-                        if (itemGroups.isEmpty()) listEmptyImage.setVisibility(View.VISIBLE);
-                        else listEmptyImage.setVisibility(View.GONE);
+                        if (itemGroups.isEmpty()) {
+                            listEmptyImage.setVisibility(View.VISIBLE);
+                            textSufficient.setVisibility(View.GONE);
+                        }
+                        else {
+                            listEmptyImage.setVisibility(View.GONE);
+                            textSufficient.setVisibility(View.VISIBLE);
+                        }
+
+                        if (mServerResponse.getResult().getRunningOutItems().isEmpty())
+                            runningOutLayout.setVisibility(View.GONE);
+                        else {
+                            runningOutLayout.setVisibility(View.VISIBLE);
+                            runningOutItems.addAll(mServerResponse.getResult().getRunningOutItems());
+                            runningOutAdapter.notifyDataSetChanged();
+                        }
                     }
                 }
             }
@@ -135,10 +168,13 @@ public class EssentialsFragment extends Fragment implements View.OnClickListener
 
     @Override
     public void onItemClick(int positionItem, int positionParent, int id) {
+        posItem = positionItem;
+        posParent = positionParent;
+        if (id == R.id.increase_quantity || id == R.id.decrease_quantity) {
+            inflateUpdateQuantityDialog();
+        }
         if (id == R.id.delete_image) {
-            Log.d("PARENT", positionParent + "");
-            Log.d("CHILD", positionItem + "");
-            adapter.notifyDataSetChanged();
+            getUserEssentials();
         }
     }
 
@@ -154,15 +190,22 @@ public class EssentialsFragment extends Fragment implements View.OnClickListener
             else editCategory(itemGroups.get(position).getCategoryId());
         } else if (id == R.id.button_cancel) {
             alertDialog.dismiss();
+        } else if (id == R.id.image_update) {
+            if (!validateQuantity())
+                return;
+            addNewQuantity();
+        } else if (id == R.id.image_close) {
+            alertDialog.dismiss();
         }
 
     }
+
 
     private void inflateCategoryDialog(String inputCategory) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         LayoutInflater inflater = LayoutInflater.from(getContext());
 
-        View view = inflater.inflate(R.layout.add_category_dialog, null);
+        View view = inflater.inflate(R.layout.dialog_add_category, null);
         builder.setView(view)
                 .setTitle("Add/Edit a Category: ");
 
@@ -180,6 +223,28 @@ public class EssentialsFragment extends Fragment implements View.OnClickListener
         cancel.setOnClickListener(this);
     }
 
+    private void inflateUpdateQuantityDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+
+        View view = inflater.inflate(R.layout.dialog_change_quantity, null);
+        builder.setView(view);
+
+        TextView textCurrentQuantity = view.findViewById(R.id.text_current_quantity);
+        String currentQuantity = "Current Quantity: " + itemGroups.get(posParent).getItems().get(posItem).getQuantity();
+        textCurrentQuantity.setText(currentQuantity);
+        updateQuantity = view.findViewById(R.id.layout_update_quantity);
+        ImageView updateImage = view.findViewById(R.id.image_update);
+        ImageView closeImage = view.findViewById(R.id.image_close);
+
+        alertDialog = builder.create();
+        alertDialog.show();
+
+        updateImage.setOnClickListener(this);
+        closeImage.setOnClickListener(this);
+
+    }
+
     private void addNewCategory() {
 
         HashMap<String, String> map = new HashMap<>();
@@ -190,11 +255,9 @@ public class EssentialsFragment extends Fragment implements View.OnClickListener
             @Override
             public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
                 if (!response.body().getError() && response.body().getMessage().equals("Created category")) {
-                    itemGroups.add(itemGroups.size(), new ItemGroup(inputCategory, new ArrayList<>()));
-                    adapter.notifyItemInserted(itemGroups.size());
-                    SharedPrefs.setIntParams(getContext(), inputCategory, position);
-                    listEmptyImage.setVisibility(View.GONE);
                     alertDialog.dismiss();
+                    getUserEssentials();
+                    listEmptyImage.setVisibility(View.GONE);
                 }
             }
 
@@ -248,6 +311,32 @@ public class EssentialsFragment extends Fragment implements View.OnClickListener
                     SharedPrefs.removeKey(getContext(), itemGroups.get(position).getGroup());
                     itemGroups.remove(position);
                     adapter.notifyItemRemoved(position);
+                    if (itemGroups.isEmpty()) listEmptyImage.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ServerResponse> call, Throwable t) {
+
+            }
+        });
+    }
+
+    private void addNewQuantity() {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("authToken", Constants.getAuthToken(getContext()));
+        map.put("itemId", itemGroups.get(posParent).getItems().get(posItem).getItemId());
+        map.put("quantity", Integer.parseInt(inputQuantity));
+        Call<ServerResponse> call = webservices.updateItemQuantity(map);
+        call.enqueue(new Callback<ServerResponse>() {
+            @Override
+            public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
+                if (response.body() != null) {
+                    if (!response.body().getError()) {
+                        alertDialog.dismiss();
+                        itemGroups.clear();
+                        getUserEssentials();
+                    }
                 }
             }
 
@@ -265,6 +354,17 @@ public class EssentialsFragment extends Fragment implements View.OnClickListener
             return false;
         } else {
             addCategory.setError(null);
+            return true;
+        }
+    }
+
+    private boolean validateQuantity() {
+        inputQuantity = updateQuantity.getEditText().getText().toString().trim();
+        if (inputQuantity.isEmpty()) {
+            updateQuantity.setError("Please add a quantity");
+            return false;
+        } else {
+            updateQuantity.setError(null);
             return true;
         }
     }

@@ -2,6 +2,7 @@ package com.bphc.oops_project.fragments.auth;
 
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
@@ -24,6 +25,7 @@ import com.bphc.oops_project.R;
 import com.bphc.oops_project.helper.APIClient;
 import com.bphc.oops_project.helper.AppSignatureHashHelper;
 import com.bphc.oops_project.helper.MySMSBroadcastReceiver;
+import com.bphc.oops_project.helper.Progress;
 import com.bphc.oops_project.helper.Webservices;
 import com.bphc.oops_project.models.ServerResponse;
 import com.bphc.oops_project.models.User;
@@ -61,12 +63,12 @@ public class PhoneAuthFragment extends Fragment implements View.OnClickListener,
     private int RESOLVE_HINT = 7;
     private CredentialsClient mCredentialsClient;
     private String authToken;
-    private Retrofit retrofit = null;
     private Webservices webservices;
     private MySMSBroadcastReceiver smsReceiver;
     private String hash;
 
     private User user;
+    private ProgressDialog progressDialog;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -81,8 +83,10 @@ public class PhoneAuthFragment extends Fragment implements View.OnClickListener,
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragent_phone_auth, container, false);
 
-        retrofit = APIClient.getRetrofitInstance();
+        Retrofit retrofit = APIClient.getRetrofitInstance();
         webservices = retrofit.create(Webservices.class);
+
+        progressDialog = Progress.getProgressDialog(getContext());
 
         phoneNumber = view.findViewById(R.id.phone_number);
         smsOtp = view.findViewById(R.id.layout_text_otp);
@@ -146,17 +150,9 @@ public class PhoneAuthFragment extends Fragment implements View.OnClickListener,
 
         SmsRetrieverClient client = SmsRetriever.getClient(getContext());
         Task<Void> task = client.startSmsRetriever();
-        task.addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                Toast.makeText(getContext(), "Successfully started retrieving", Toast.LENGTH_SHORT).show();
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Toast.makeText(getContext(), "Failed to start retrieving", Toast.LENGTH_SHORT).show();
-            }
-        });
+        task.addOnSuccessListener(aVoid -> {
+
+        }).addOnFailureListener(e -> Toast.makeText(getContext(), "Failed to start retrieving", Toast.LENGTH_SHORT).show());
 
     }
 
@@ -168,6 +164,7 @@ public class PhoneAuthFragment extends Fragment implements View.OnClickListener,
         smsOtp.getEditText().setText(otp);
 
         button_getOtp.setText("Verify");
+        button_getOtp.setEnabled(false);
 
         if (smsReceiver != null) {
             getActivity().unregisterReceiver(smsReceiver);
@@ -185,7 +182,7 @@ public class PhoneAuthFragment extends Fragment implements View.OnClickListener,
                 if (mServerResponse != null) {
                     if (!mServerResponse.error &&
                             mServerResponse.message.equals("Successfully verified phone number")) {
-
+                        Progress.dismissProgress(progressDialog);
                         Gson gson = new Gson();
 
                         SharedPrefs.setBooleanParams(getContext(), PHONE_VERIFIED, true);
@@ -231,6 +228,8 @@ public class PhoneAuthFragment extends Fragment implements View.OnClickListener,
     }
 
     private void requestOTP() {
+
+        Progress.showProgress(true, "Fetching your otp...");
 
         if (!authToken.isEmpty()) {
             Call<ServerResponse> call = webservices.requestOTP(authToken, inputPhone, hash);

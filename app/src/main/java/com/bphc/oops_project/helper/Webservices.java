@@ -5,23 +5,28 @@ import com.bphc.oops_project.models.ServerResponse;
 
 import java.util.HashMap;
 
-import retrofit.mime.TypedFile;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
-import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
 
 import static com.bphc.oops_project.app.Constants.ADD_USER_DETAILS;
 import static com.bphc.oops_project.app.Constants.CREATE_CATEGORY;
 import static com.bphc.oops_project.app.Constants.CREATE_ITEM;
+import static com.bphc.oops_project.app.Constants.CREATE_TASK;
 import static com.bphc.oops_project.app.Constants.DASHBOARD;
 import static com.bphc.oops_project.app.Constants.DELETE_CATEGORY;
+import static com.bphc.oops_project.app.Constants.DELETE_ITEM;
+import static com.bphc.oops_project.app.Constants.DELETE_TASK;
 import static com.bphc.oops_project.app.Constants.EDIT_CATEGORY;
 import static com.bphc.oops_project.app.Constants.GOOGLE_AUTH;
 import static com.bphc.oops_project.app.Constants.PHONE_AUTH;
+import static com.bphc.oops_project.app.Constants.TODO;
+import static com.bphc.oops_project.app.Constants.UPDATE_ITEM_QUANTITY;
 
 public interface Webservices {
 
@@ -54,13 +59,24 @@ public interface Webservices {
     @POST(CREATE_ITEM)
     Call<ServerResponse> createItem(@Body HashMap<String, Object> itemDetails);
 
-    @Multipart
+    @POST(DELETE_ITEM)
+    Call<ServerResponse> deleteItem(@Body HashMap<String, Object> itemDetails);
+
+    @POST(UPDATE_ITEM_QUANTITY)
+    Call<ServerResponse> updateItemQuantity(@Body HashMap<String, Object> itemDetails);
+
+    @FormUrlEncoded
     @POST("https://api.imgur.com/3/image")
     Call<ImageResponse> postImage(@Header("Authorization") String auth,
-                                  @Query("title") String title,
-                                  @Query("description") String description,
-                                  @Query("album") String albumId,
-                                  @Query("account_url") String username,
-                                  @Body TypedFile typedFile);
+                                  @Field("image") String encoded);
+
+    @POST(CREATE_TASK)
+    Call<ServerResponse> createTask(@Body HashMap<String, String> taskDetails);
+
+    @GET(TODO)
+    Call<ServerResponse> getUserToDos(@Query("authToken") String authToken);
+
+    @POST(DELETE_TASK)
+    Call<ServerResponse> deleteTask(@Body HashMap<String, Object> taskDetails);
 
 }

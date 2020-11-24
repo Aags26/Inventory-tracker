@@ -18,16 +18,31 @@ public class Item {
     @SerializedName("quantity")
     public String quantity;
 
+    @SerializedName("roQuantity")
+    public int roQuantity;
+
     @SerializedName("category")
     public String category;
 
-    public Item (String image, String name, String quantity, String category) {
+    @SerializedName("unit")
+    public String unit;
+
+    public Item (String image, String name, String quantity, int roQuantity, String category, String unit) {
         this.image = image;
         this.name = name;
         this.quantity = quantity;
+        this.roQuantity = roQuantity;
         this.category = category;
+        this.unit = unit;
     }
 
+    public String getUnit() {
+        return unit;
+    }
+
+    public void setUnit(String unit) {
+        this.unit = unit;
+    }
 
     public String getImage() {
         return image;
@@ -51,6 +66,14 @@ public class Item {
 
     public void setItemId(int itemId) {
         this.itemId = itemId;
+    }
+
+    public int getRoQuantity() {
+        return roQuantity;
+    }
+
+    public void setRoQuantity(int roQuantity) {
+        this.roQuantity = roQuantity;
     }
 
     public String getQuantity() {

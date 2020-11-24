@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bphc.oops_project.R;
 import com.bphc.oops_project.helper.OnItemClickListener;
 import com.bphc.oops_project.models.Item;
+import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 
@@ -35,7 +36,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
 
     public static class ItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        ImageView itemImage, deleteImage;
+        ImageView itemImage, deleteImage, increaseImage, decreaseImage;
         TextView itemName, itemQuantity;
         OnItemClickListener listener;
         ArrayList<Item> items;
@@ -52,8 +53,12 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
             itemName = itemView.findViewById(R.id.item_name);
             itemQuantity = itemView.findViewById(R.id.item_quantity);
             deleteImage = itemView.findViewById(R.id.delete_image);
+            increaseImage = itemView.findViewById(R.id.increase_quantity);
+            decreaseImage = itemView.findViewById(R.id.decrease_quantity);
 
             deleteImage.setOnClickListener(this);
+            increaseImage.setOnClickListener(this);
+            decreaseImage.setOnClickListener(this);
 
         }
 
@@ -62,8 +67,6 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
             if (listener != null) {
                 int position = getAdapterPosition();
                 if (position != RecyclerView.NO_POSITION) {
-                    Log.d("PARENT", items.get(position).getPositionParent(context, items.get(position).getCategory()) + "");
-                    Log.d("CHILD", position + "");
                     listener.onItemClick(position, items.get(position).getPositionParent(context, items.get(position).getCategory()), v.getId());
                 }
             }
@@ -80,10 +83,10 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
     @Override
     public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
         Item item = items.get(position);
-        holder.itemImage.setImageResource(R.mipmap.ic_launcher);
+        if (item.getImage() == null) holder.itemImage.setImageResource(R.mipmap.ic_launcher);
+        else Glide.with(context).load(item.getImage()).into(holder.itemImage);
         holder.itemName.setText(item.getName());
         holder.itemQuantity.setText(item.getQuantity());
-        Toast.makeText(context, item.getName(), Toast.LENGTH_SHORT).show();
     }
 
     @Override

@@ -14,10 +14,20 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bphc.oops_project.R;
+import com.bphc.oops_project.app.Constants;
+import com.bphc.oops_project.helper.APIClient;
 import com.bphc.oops_project.helper.OnItemClickListener;
+import com.bphc.oops_project.helper.Webservices;
 import com.bphc.oops_project.models.ItemGroup;
+import com.bphc.oops_project.models.ServerResponse;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 
 public class ItemGroupAdapter extends RecyclerView.Adapter<ItemGroupAdapter.ItemGroupViewHolder> implements OnItemClickListener{
@@ -65,6 +75,11 @@ public class ItemGroupAdapter extends RecyclerView.Adapter<ItemGroupAdapter.Item
     }
 
     @Override
+    public int getItemCount() {
+        return itemGroups.size();
+    }
+
+    @Override
     public void onItemClick(int position, int id) {
 
     }
@@ -72,18 +87,37 @@ public class ItemGroupAdapter extends RecyclerView.Adapter<ItemGroupAdapter.Item
     @Override
     public void onItemClick(int positionItem, int positionParent, int id) {
         if (id == R.id.delete_image) {
-            Log.d("PARENT", positionParent + "");
-            Log.d("CHILD", positionItem + "");
-            ItemGroup itemGroup = itemGroups.get(positionParent);
-            itemGroup.getItems().remove(positionItem);
-            adapter.notifyItemRemoved(positionItem);
-            listener.onItemClick(positionItem, positionParent, id);
-        }
+            int itemId = itemGroups.get(positionParent).getItems().get(positionItem).getItemId();
+            removeItem(positionItem, positionParent, itemId, id);
+        } else listener.onItemClick(positionItem, positionParent, id);
+
     }
 
-    @Override
-    public int getItemCount() {
-        return itemGroups.size();
+    private void removeItem(int posItem, int posParent, int itemId, int viewId) {
+        Retrofit retrofit = APIClient.getRetrofitInstance();
+        Webservices webservices = retrofit.create(Webservices.class);
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("authToken", Constants.getAuthToken(context));
+        map.put("itemId", itemId);
+
+        Call<ServerResponse> call = webservices.deleteItem(map);
+        call.enqueue(new Callback<ServerResponse>() {
+            @Override
+            public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
+                if (response.body() != null) {
+                    if (!response.body().getError()) {
+                        itemGroups.get(posParent).getItems().remove(posItem);
+                        adapter.notifyItemRemoved(posItem);
+                        listener.onItemClick(posItem, posParent, viewId);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ServerResponse> call, Throwable t) {
+
+            }
+        });
     }
 
     public static class ItemGroupViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

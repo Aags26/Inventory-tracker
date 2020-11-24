@@ -36,9 +36,16 @@ public class Result {
     @SerializedName("categories")
     public ArrayList<ItemGroup> categories;
 
+    @SerializedName("runningOut")
+    public ArrayList<Item> runningOutItems;
+
+    @SerializedName("todo")
+    public ArrayList<ToDo> toDos;
+
 
     public Result(String userId, String name, String username, String email, boolean phoneVerified,
-                  boolean professionGiven, String phone, String profession, String authToken, ArrayList<ItemGroup> categories) {
+                  boolean professionGiven, String phone, String profession, String authToken, ArrayList<ItemGroup> categories,
+                  ArrayList<ToDo> toDos, ArrayList<Item> runningOutItems) {
         this.userId = userId;
         this.name = name;
         this.username = username;
@@ -49,6 +56,8 @@ public class Result {
         this.profession = profession;
         this.authToken = authToken;
         this.categories = categories;
+        this.toDos = toDos;
+        this.runningOutItems = runningOutItems;
     }
 
     public String getUserId() {
@@ -129,5 +138,21 @@ public class Result {
 
     public void setCategories(ArrayList<ItemGroup> categories) {
         this.categories = categories;
+    }
+
+    public ArrayList<ToDo> getToDos() {
+        return toDos;
+    }
+
+    public void setToDos(ArrayList<ToDo> toDos) {
+        this.toDos = toDos;
+    }
+
+    public ArrayList<Item> getRunningOutItems() {
+        return runningOutItems;
+    }
+
+    public void setRunningOutItems(ArrayList<Item> runningOutItems) {
+        this.runningOutItems = runningOutItems;
     }
 }

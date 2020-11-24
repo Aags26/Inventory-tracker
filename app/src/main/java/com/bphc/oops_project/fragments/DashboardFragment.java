@@ -12,6 +12,8 @@ import androidx.fragment.app.Fragment;
 
 import com.bphc.oops_project.R;
 import com.bphc.oops_project.fragments.dashboard.EssentialsFragment;
+import com.bphc.oops_project.fragments.dashboard.ProfileFragment;
+import com.bphc.oops_project.fragments.dashboard.ToDoFragment;
 import com.bphc.oops_project.helper.OnItemClickListener;
 import com.bphc.oops_project.models.User;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -49,9 +51,13 @@ public class DashboardFragment extends Fragment implements BottomNavigationView.
         switch (item.getItemId()) {
 
             case R.id.essentials:
-            case R.id.todo_list:
                 selectedFragment = new EssentialsFragment();
                 break;
+            case R.id.todo_list:
+                selectedFragment = new ToDoFragment();
+                break;
+            case R.id.profile:
+                selectedFragment = new ProfileFragment();
         }
 
         loadFragment(selectedFragment);

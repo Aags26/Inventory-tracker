@@ -9,31 +9,31 @@
         android:id="@+id/toolbar_add_item"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:menu="@menu/tick"
-        app:title="Item Details"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:menu="@menu/tick"
+        app:title="Item Details"/>
 
     <TextView
         android:id="@+id/item_category_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="8dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar_add_item"
-        android:layout_margin="8dp"/>
+        app:layout_constraintTop_toBottomOf="@id/toolbar_add_item" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/add_item_name"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
-        app:errorEnabled="true"
+        android:layout_margin="8dp"
         android:hint="Name"
+        app:errorEnabled="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/item_category_text"
-        android:layout_margin="8dp">
+        app:layout_constraintTop_toBottomOf="@id/item_category_text">
 
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
@@ -43,19 +43,59 @@
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/add_item_quantity"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
-        app:errorEnabled="true"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
         android:hint="Qty"
+        app:errorEnabled="true"
+        app:layout_constraintEnd_toStartOf="@id/add_item_quantity_unit"
         app:layout_constraintStart_toStartOf="@id/add_item_name"
-        app:layout_constraintEnd_toEndOf="@id/add_item_name"
-        app:layout_constraintTop_toBottomOf="@id/add_item_name"
-        android:layout_marginTop="8dp">
+        app:layout_constraintTop_toBottomOf="@id/add_item_name">
 
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:inputType="number" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/add_item_quantity_unit"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:hint="Unit"
+        app:errorEnabled="true"
+        app:layout_constraintEnd_toEndOf="@id/add_item_name"
+        app:layout_constraintStart_toEndOf="@id/add_item_quantity"
+        app:layout_constraintTop_toBottomOf="@id/add_item_name">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/layout_ro_quantity"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Run out quantity (Optional)"
+        app:errorEnabled="true"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="@id/add_item_quantity_unit"
+        app:layout_constraintStart_toStartOf="@id/add_item_quantity"
+        app:layout_constraintTop_toBottomOf="@id/add_item_quantity">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:inputType="number" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -64,18 +104,31 @@
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_marginTop="24dp"
+        android:scaleType="centerCrop"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/add_item_quantity" />
+        app:layout_constraintTop_toBottomOf="@id/layout_ro_quantity" />
 
     <TextView
-        android:id="@+id/text_add_item_image"
+        android:id="@+id/text_gallery"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Add Image"
-        app:layout_constraintStart_toStartOf="@id/add_item_image"
+        android:layout_marginTop="8dp"
+        android:text="Gallery"
         app:layout_constraintEnd_toEndOf="@id/add_item_image"
-        app:layout_constraintTop_toBottomOf="@id/add_item_image"
-        android:layout_marginTop="8dp"/>
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toStartOf="@id/add_item_image"
+        app:layout_constraintTop_toBottomOf="@id/add_item_image" />
+
+    <TextView
+        android:id="@+id/text_camera"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Camera"
+        app:layout_constraintEnd_toEndOf="@id/add_item_image"
+        app:layout_constraintHorizontal_bias="1"
+        app:layout_constraintStart_toStartOf="@id/add_item_image"
+        app:layout_constraintTop_toBottomOf="@id/add_item_image" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

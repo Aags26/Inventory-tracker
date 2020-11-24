@@ -1,13 +1,12 @@
 package com.bphc.oops_project.fragments.auth;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,6 +16,7 @@ import androidx.navigation.Navigation;
 
 import com.bphc.oops_project.R;
 import com.bphc.oops_project.helper.APIClient;
+import com.bphc.oops_project.helper.Progress;
 import com.bphc.oops_project.helper.Webservices;
 import com.bphc.oops_project.models.ServerResponse;
 import com.bphc.oops_project.models.Result;
@@ -28,7 +28,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -45,6 +44,7 @@ import static com.bphc.oops_project.prefs.SharedPrefsConstants.JWTS_TOKEN;
 import static com.bphc.oops_project.prefs.SharedPrefsConstants.PHONE_VERIFIED;
 import static com.bphc.oops_project.prefs.SharedPrefsConstants.PROFESSION_GIVEN;
 import static com.bphc.oops_project.prefs.SharedPrefsConstants.USER;
+import static com.bphc.oops_project.prefs.SharedPrefsConstants.USER_PHOTO;
 
 public class GoogleAuthFragment extends Fragment implements View.OnClickListener {
 
@@ -52,6 +52,7 @@ public class GoogleAuthFragment extends Fragment implements View.OnClickListener
     private GoogleSignInClient mGoogleSignInClient;
     private String idToken;
     private Gson gson = new Gson();
+    private ProgressDialog progressDialog;
 
     @Nullable
     @Override
@@ -61,8 +62,7 @@ public class GoogleAuthFragment extends Fragment implements View.OnClickListener
         SignInButton signInButton = view.findViewById(R.id.sign_in_button);
         signInButton.setOnClickListener(this);
 
-        Button signOutButton = view.findViewById(R.id.sign_out_button);
-        signOutButton.setOnClickListener(this);
+        progressDialog = Progress.getProgressDialog(getContext());
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.client_id))
@@ -87,8 +87,6 @@ public class GoogleAuthFragment extends Fragment implements View.OnClickListener
     public void onClick(View v) {
         if (v.getId() == R.id.sign_in_button) {
             signIn();
-        } else {
-            signOut();
         }
     }
 
@@ -101,6 +99,7 @@ public class GoogleAuthFragment extends Fragment implements View.OnClickListener
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RC_SIGN_IN) {
+            Progress.showProgress(true, "Signing In...");
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             handleSignInResult(task);
         }
@@ -131,6 +130,7 @@ public class GoogleAuthFragment extends Fragment implements View.OnClickListener
     private void updateUI(GoogleSignInAccount account) {
         if (account != null) {
             idToken = account.getIdToken();
+            SharedPrefs.setStringParams(getContext(), USER_PHOTO, account.getPhotoUrl().toString());
             sendTokenToServer();
         }
     }
@@ -151,7 +151,10 @@ public class GoogleAuthFragment extends Fragment implements View.OnClickListener
                 if (mServerResponse != null) {
                     Result result = mServerResponse.getResult();
                     SharedPrefs.setStringParams(getContext(), JWTS_TOKEN, result.authToken);
+                    Progress.dismissProgress(progressDialog);
                     if (result.phoneVerified && result.professionGiven) {
+                        SharedPrefs.setBooleanParams(getContext(), PHONE_VERIFIED, true);
+                        SharedPrefs.setBooleanParams(getContext(), PROFESSION_GIVEN, true);
                         User user = new User(result.email, result.name, result.username, result.profession, result.phone);
                         toDashboard(user);
                     } else {
@@ -164,20 +167,12 @@ public class GoogleAuthFragment extends Fragment implements View.OnClickListener
 
             @Override
             public void onFailure(Call<ServerResponse> call, Throwable t) {
-
+                if (t.getMessage().equals("timeout")) {
+                    sendTokenToServer();
+                }
             }
         });
 
-    }
-
-    private void signOut() {
-        mGoogleSignInClient.signOut()
-                .addOnCompleteListener(requireActivity(), new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        Toast.makeText(getContext(), "Signed Out", Toast.LENGTH_SHORT).show();
-                    }
-                });
     }
 
     private void toPhoneAuth(User user) {

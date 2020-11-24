@@ -1,8 +1,12 @@
 package com.bphc.oops_project.fragments;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,9 +25,8 @@ import androidx.fragment.app.Fragment;
 
 import com.bphc.oops_project.R;
 import com.bphc.oops_project.app.Constants;
-import com.bphc.oops_project.fragments.dashboard.EssentialsFragment;
 import com.bphc.oops_project.helper.APIClient;
-import com.bphc.oops_project.helper.DocumentHelper;
+import com.bphc.oops_project.helper.Progress;
 import com.bphc.oops_project.helper.Webservices;
 import com.bphc.oops_project.models.ImageResponse;
 import com.bphc.oops_project.models.ServerResponse;
@@ -31,10 +34,10 @@ import com.bphc.oops_project.prefs.SharedPrefs;
 import com.bumptech.glide.Glide;
 import com.google.android.material.textfield.TextInputLayout;
 
-import java.io.File;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 
-import retrofit.mime.TypedFile;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -47,17 +50,18 @@ public class AddItemFragment extends Fragment implements View.OnClickListener {
 
     private static final String ARG_PARAM1 = "ARG_PARAM1";
     private static final String ARG_PARAM2 = "ARG_PARAM2";
-    private String category;
+    private String category, encoded = "", link;
     private int categoryId;
-    private TextInputLayout addItem, addQuantity;
+    private TextInputLayout addItem, addQuantity, addRoQuantity, addUnit;
     private String inputItemName, inputQuantity;
+    private Webservices webservices;
 
     private ImageView itemImage;
-    public final static int FILE_PICK = 1001;
-    private File chosenFile;
+    public final static int IMAGE_PICK = 1001;
+    public final static int IMAGE_CLICK = 1002;
+    private ProgressDialog progressDialog;
 
     public static AddItemFragment newInstance(int categoryId, String category) {
-        
         Bundle args = new Bundle();
         args.putInt(ARG_PARAM1, categoryId);
         args.putString(ARG_PARAM2, category);
@@ -73,6 +77,8 @@ public class AddItemFragment extends Fragment implements View.OnClickListener {
             categoryId = getArguments().getInt(ARG_PARAM1, -1);
             category = getArguments().getString(ARG_PARAM2);
         }
+        Retrofit retrofit = APIClient.getRetrofitInstance();
+        webservices = retrofit.create(Webservices.class);
         setHasOptionsMenu(true);
     }
 
@@ -86,14 +92,14 @@ public class AddItemFragment extends Fragment implements View.OnClickListener {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                getActivity().onBackPressed();
+                if (getActivity() != null) getActivity().onBackPressed();
                 return true;
             case R.id.update:
                 if (!validateItemName() | !validateQuantity()) {
                     return false;
                 }
-                createUpload(chosenFile);
-                //addNewItem();
+                if (!encoded.isEmpty()) createUpload();
+                else addNewItem();
                 return true;
         }
         return onOptionsItemSelected(item);
@@ -113,50 +119,94 @@ public class AddItemFragment extends Fragment implements View.OnClickListener {
         TextView textCategory = view.findViewById(R.id.item_category_text);
         textCategory.setText(category);
 
+        progressDialog = Progress.getProgressDialog(getContext());
         itemImage = view.findViewById(R.id.add_item_image);
 
-        TextView textItemAddImage = view.findViewById(R.id.text_add_item_image);
-        textItemAddImage.setOnClickListener(this);
+        TextView galleryImage = view.findViewById(R.id.text_gallery);
+        galleryImage.setOnClickListener(this);
+
+        TextView cameraImage = view.findViewById(R.id.text_camera);
+        cameraImage.setOnClickListener(this);
 
         addItem = view.findViewById(R.id.add_item_name);
         addQuantity = view.findViewById(R.id.add_item_quantity);
+        addRoQuantity = view.findViewById(R.id.layout_ro_quantity);
+        addUnit = view.findViewById(R.id.add_item_quantity_unit);
+
         return view;
     }
 
     @Override
     public void onClick(View v) {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("image/*");
-        startActivityForResult(intent, FILE_PICK);
+        Intent intent = new Intent();
+        switch (((TextView) v).getText().toString()) {
+            case "Gallery":
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/*");
+                startActivityForResult(intent, IMAGE_PICK);
+                break;
+            case "Camera":
+                intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(intent, IMAGE_CLICK);
+                break;
+        }
+
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode != FILE_PICK) return;
-        if (resultCode != RESULT_OK) return;
 
-        Uri returnUri = data.getData();
-        Glide.with(getContext()).load(returnUri).into(itemImage);
-        //String filePath = DocumentHelper.getPath(getContext(), returnUri);
-        //if (filePath == null || filePath.isEmpty()) return;
-        File file = new File(returnUri.getPath());
-        Toast.makeText(getContext(), returnUri.getPath(), Toast.LENGTH_SHORT).show();
-        final String[] split = file.getPath().split(":");
-        chosenFile = new File(split[1]);
-        Toast.makeText(getContext(), "Perf", Toast.LENGTH_SHORT).show();
+        if (resultCode == RESULT_OK && data != null) {
+            Bitmap bitmap = null;
+            switch (requestCode) {
+                case IMAGE_PICK:
+                    if (data.getData() != null) {
+                        Uri returnUri = data.getData();
+                        try {
+                            Glide.with(requireContext()).load(returnUri).into(itemImage);
+                            bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), returnUri);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    break;
+                case IMAGE_CLICK:
+                    if (data.getExtras() != null) {
+                        bitmap = (Bitmap) data.getExtras().get("data");
+                        itemImage.setImageBitmap(bitmap);
+                    }
+                    break;
+            }
+            if (bitmap == null) return;
+            encodeImage(bitmap);
+        }
+
     }
 
-    private void createUpload(File image) {
-        Retrofit retrofit = APIClient.getRetrofitInstance();
-        Webservices webservices = retrofit.create(Webservices.class);
-        Call<ImageResponse> call = webservices.postImage(Constants.getImgurClientId(),
-                "title", "description", "", null,
-                new TypedFile("image/*", image));
+    private void encodeImage(Bitmap bitmap) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+        byte[] byteArray = byteArrayOutputStream.toByteArray();
+        encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
+    }
+
+    private void createUpload() {
+
+        Progress.showProgress(true, "Uploading...may take a while");
+        Call<ImageResponse> call = webservices.postImage(Constants.getImgurClientId(), encoded);
         call.enqueue(new Callback<ImageResponse>() {
             @Override
             public void onResponse(Call<ImageResponse> call, Response<ImageResponse> response) {
-
+                ImageResponse mImageResponse = response.body();
+                if (mImageResponse != null) {
+                    if (mImageResponse.isSuccess()) {
+                        ImageResponse.UploadedImage data = mImageResponse.getData();
+                        link = data.link;
+                        addNewItem();
+                        Progress.dismissProgress(progressDialog);
+                    }
+                }
             }
 
             @Override
@@ -168,21 +218,24 @@ public class AddItemFragment extends Fragment implements View.OnClickListener {
 
     private void addNewItem() {
 
+        Progress.showProgress(true, "Uploading...");
         String authToken = SharedPrefs.getStringParams(getContext(), JWTS_TOKEN, "");
-        Retrofit retrofit = APIClient.getRetrofitInstance();
-        Webservices webservices = retrofit.create(Webservices.class);
 
         HashMap<String, Object> map = new HashMap<>();
         map.put("authToken", authToken);
         map.put("name", inputItemName);
         map.put("categoryId", categoryId);
         map.put("quantity", Integer.parseInt(inputQuantity));
-        map.put("image", "");
+        map.put("unit", addUnit.getEditText().getText().toString().trim());
+        if (!addRoQuantity.getEditText().getText().toString().trim().isEmpty())
+            map.put("roQuantity", Integer.parseInt(addRoQuantity.getEditText().getText().toString().trim()));
+        map.put("image", link);
         Call<ServerResponse> call = webservices.createItem(map);
         call.enqueue(new Callback<ServerResponse>() {
             @Override
             public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
                 if (!response.body().getError() && response.body().getMessage().equals("Created item")) {
+                    Progress.dismissProgress(progressDialog);
                     getActivity().onBackPressed();
                 }
 
@@ -216,4 +269,6 @@ public class AddItemFragment extends Fragment implements View.OnClickListener {
             return true;
         }
     }
+
+
 }

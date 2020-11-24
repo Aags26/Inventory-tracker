@@ -56,4 +56,27 @@ public class ImageResponse {
                 '}';
     }
 
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public UploadedImage getData() {
+        return data;
+    }
+
+    public void setData(UploadedImage data) {
+        this.data = data;
+    }
 }
