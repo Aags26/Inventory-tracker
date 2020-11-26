@@ -13,7 +13,8 @@
             android:id="@+id/action_googleAuthFragment_to_dashboardFragment"
             app:destination="@id/dashboardFragment"
             app:popExitAnim="@anim/fragment_close_enter"
-            app:popUpTo="@id/googleAuthFragment" />
+            app:popUpTo="@id/googleAuthFragment"
+            app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_googleAuthFragment_to_phoneAuthFragment"
             app:destination="@id/phoneAuthFragment"
@@ -57,16 +58,31 @@
         android:name="com.bphc.oops_project.fragments.auth.UserDetailsFragment"
         android:label="fragment_user_details"
         tools:layout="@layout/fragment_user_details" >
-        <action
-            android:id="@+id/action_userDetailsFragment_to_dashboardFragment"
-            app:destination="@id/dashboardFragment"
-            app:popUpTo="@id/userDetailsFragment"
-            app:popUpToInclusive="true" />
         <argument
             android:name="user"
             app:argType="com.bphc.oops_project.models.User"
             app:nullable="true"
             android:defaultValue="@null" />
+        <action
+            android:id="@+id/action_userDetailsFragment_to_recommendationsFragment"
+            app:destination="@id/recommendationsFragment"
+            app:popUpTo="@id/userDetailsFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/recommendationsFragment"
+        android:name="com.bphc.oops_project.fragments.RecommendationsFragment"
+        android:label="fragment_recommendations"
+        tools:layout="@layout/fragment_recommendations" >
+        <action
+            android:id="@+id/action_recommendationsFragment_to_dashboardFragment"
+            app:destination="@id/dashboardFragment"
+            app:popUpTo="@id/recommendationsFragment"
+            app:popUpToInclusive="true" />
+        <argument
+            android:name="user"
+            app:argType="com.bphc.oops_project.models.User"
+            app:nullable="true" />
     </fragment>
 
 </navigation>
