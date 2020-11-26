@@ -4,6 +4,94 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity2">
+    tools:context=".ToDoTaskDetails">
+
+    <TextView
+        android:id="@+id/text_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_margin="16dp"
+        android:text="Title"
+        android:textSize="12sp"
+        android:textColor="@color/purple_700"/>
+
+    <TextView
+        android:id="@+id/title_details"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="@id/text_title"
+        app:layout_constraintTop_toBottomOf="@id/text_title"
+        android:layout_margin="8dp"
+        tools:text="Title"
+        android:textSize="18sp"
+        android:textColor="@color/black"/>
+
+    <TextView
+        android:id="@+id/text_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/title_details"
+        android:layout_margin="16dp"
+        android:text="Description"
+        android:textSize="12sp"
+        android:textColor="@color/purple_700"/>
+
+    <TextView
+        android:id="@+id/description_details"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="@id/text_description"
+        app:layout_constraintTop_toBottomOf="@id/text_description"
+        android:layout_margin="8dp"
+        tools:text="Description"
+        android:textSize="18sp"
+        android:textColor="@color/black"/>
+
+    <TextView
+        android:id="@+id/text_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/description_details"
+        android:layout_margin="16dp"
+        android:text="Date"
+        android:textSize="12sp"
+        android:textColor="@color/purple_700"/>
+
+    <TextView
+        android:id="@+id/date_details"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="@id/text_date"
+        app:layout_constraintTop_toBottomOf="@id/text_date"
+        android:layout_margin="8dp"
+        tools:text="Date"
+        android:textSize="18sp"
+        android:textColor="@color/black"/>
+
+    <TextView
+        android:id="@+id/text_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/date_details"
+        android:layout_margin="16dp"
+        android:text="Time"
+        android:textSize="12sp"
+        android:textColor="@color/purple_700"/>
+
+    <TextView
+        android:id="@+id/time_details"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="@id/text_time"
+        app:layout_constraintTop_toBottomOf="@id/text_time"
+        android:layout_margin="8dp"
+        tools:text="Time"
+        android:textSize="18sp"
+        android:textColor="@color/black"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
