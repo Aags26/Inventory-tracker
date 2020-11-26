@@ -8,5 +8,6 @@ public class SharedPrefsConstants {
     public static final String PROFESSION_GIVEN = "profession_given";
 
     public static final String USER_PHOTO = "user_photo";
+    public static final String PENDING_INTENTS = "pending_intents";
 
 }
