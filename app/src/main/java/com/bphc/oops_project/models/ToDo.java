@@ -1,8 +1,11 @@
 package com.bphc.oops_project.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.SerializedName;
 
-public class ToDo {
+public class ToDo implements Parcelable {
 
     @SerializedName("title")
     public String title;
@@ -15,6 +18,25 @@ public class ToDo {
 
     @SerializedName("taskId")
     public int taskId;
+
+    protected ToDo(Parcel in) {
+        title = in.readString();
+        tasktime = in.readString();
+        description = in.readString();
+        taskId = in.readInt();
+    }
+
+    public static final Creator<ToDo> CREATOR = new Creator<ToDo>() {
+        @Override
+        public ToDo createFromParcel(Parcel in) {
+            return new ToDo(in);
+        }
+
+        @Override
+        public ToDo[] newArray(int size) {
+            return new ToDo[size];
+        }
+    };
 
     public int getTaskId() {
         return taskId;
@@ -48,10 +70,29 @@ public class ToDo {
         this.tasktime = tasktime;
     }
 
+    public ToDo(String title, String tasktime, String description) {
+        this.title = title;
+        this.tasktime = tasktime;
+        this.description = description;
+    }
+
     public ToDo(String title, String tasktime, String description, int taskId) {
         this.title = title;
         this.tasktime = tasktime;
         this.description = description;
         this.taskId = taskId;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(title);
+        dest.writeString(tasktime);
+        dest.writeString(description);
+        dest.writeInt(taskId);
     }
 }
