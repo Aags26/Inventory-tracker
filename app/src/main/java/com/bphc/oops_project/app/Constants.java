@@ -17,6 +17,8 @@ public class Constants {
     public static final String PHONE_AUTH = "account/otp";
     public static final String ADD_USER_DETAILS = "account/complete";
 
+    public static final String RECOMMENDATIONS = "dashboard/recommendations";
+
     public static final String DASHBOARD = "dashboard";
 
     public static final String CREATE_CATEGORY = "dashboard/category/create";
@@ -30,6 +32,7 @@ public class Constants {
     public static final String TODO = "todo";
 
     public static final String CREATE_TASK = "todo/item/create";
+    public static final String EDIT_TASK = "todo/item/edit";
     public static final String DELETE_TASK = "todo/item/delete";
 
     public static String getAuthToken(Context context) {
